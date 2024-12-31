@@ -280,31 +280,67 @@
     <p>Pena: 0-2 anos</p>
   </div>
 </div>
-
+  <div class="total">
+      <p>Total de Multas: R$ <span id="totalMulta">0</span></p>
+      <p>Total de Penas (Mínimo): <span id="totalPenaMin">0</span> anos</p>
+      <p>Total de Penas (Máximo): <span id="totalPenaMax">0</span> anos</p>
+    </div>
+    <div style="text-align:center; margin-top: 20px;">
+      <button onclick="resetCalculations()">Resetar</button>
+    </div>
+  </div>
 
   <script>
     let totalMulta = 0;
     let totalPenaMin = 0;
     let totalPenaMax = 0;
+    let crimesSelecionados = [];
 
     function addCrime(nome, multa, penaMin, penaMax) {
       totalMulta += multa;
       totalPenaMin += penaMin;
       totalPenaMax += penaMax;
 
-      document.getElementById("totalMulta").innerText = totalMulta;
-      document.getElementById("totalPenaMin").innerText = totalPenaMin;
-      document.getElementById("totalPenaMax").innerText = totalPenaMax;
+      crimesSelecionados.push({nome, multa, penaMin, penaMax});
+
+      updateTotals();
+    }
+
+    function updateTotals() {
+      document.getElementById("totalMulta").innerText = totalMulta.toLocaleString('pt-BR');
+      document.getElementById("totalPenaMin").innerText = totalPenaMin.toFixed(2);
+      document.getElementById("totalPenaMax").innerText = totalPenaMax.toFixed(2);
     }
 
     function resetCalculations() {
       totalMulta = 0;
       totalPenaMin = 0;
       totalPenaMax = 0;
+      crimesSelecionados = [];
 
-      document.getElementById("totalMulta").innerText = totalMulta;
-      document.getElementById("totalPenaMin").innerText = totalPenaMin;
-      document.getElementById("totalPenaMax").innerText = totalPenaMax;
+      updateTotals();
+    }
+
+    // Função para editar um crime específico (exemplo)
+    function editCrime(index, novoNome, novaMulta, novaPenaMin, novaPenaMax) {
+      if (index >= 0 && index < crimesSelecionados.length) {
+        let crime = crimesSelecionados[index];
+        
+        totalMulta -= crime.multa;
+        totalPenaMin -= crime.penaMin;
+        totalPenaMax -= crime.penaMax;
+
+        crime.nome = novoNome;
+        crime.multa = novaMulta;
+        crime.penaMin = novaPenaMin;
+        crime.penaMax = novaPenaMax;
+
+        totalMulta += novaMulta;
+        totalPenaMin += novaPenaMin;
+        totalPenaMax += novaPenaMax;
+
+        updateTotals();
+      }
     }
   </script>
 </body>

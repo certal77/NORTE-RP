@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Crimes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef2f3;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .sum-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .sum-container button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .sum-container button:hover {
+            background-color: #45a049;
+        }
+
+        .sum-container p {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Crimes</h1>
+
+        <!-- Tabela de Crimes -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Descrição do Crime</th>
+                    <th>Multa (€)</th>
+                    <th>Pena de Prisão Mínima</th>
+                    <th>Pena de Prisão Máxima</th>
+                    <th>Pena de Prisão Recomendada</th>
+                    <th>Selecionar</th>
+                </tr>
+            </thead>
+            <tbody id="crimeTable">
+                <!-- Crimes serão preenchidos dinamicamente -->
+            </tbody>
+        </table>
+
+        <!-- Calculadora -->
+        <div class="sum-container">
+            <button onclick="calculateSum()">Calcular Total</button>
+            <p id="result"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+         // Lista de crimes pré-definidos
+const crimes = [
+    { artigo: "4", descricao: "Desobediência a Ordens das Autoridades", multa: 6000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "13", descricao: "Posição de Marcha Indevida", multa: 3000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "17", descricao: "Circular em Bermas e Passeios", multa: 3000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "59", descricao: "Regras Gerais de Ausência de Iluminação", multa: 3000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "72", descricao: "Manobras Proibidas em Autoestradas", multa: 2500, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "81.6.a", descricao: "Condução Sob Influência de Álcool (Grave)", multa: 12500, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "81.6.b", descricao: "Condução Sob Influência de Álcool (Muito Grave)", multa: 25000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "85", descricao: "Ausência de Documentos do Condutor", multa: 3000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "90", descricao: "Regras de Condução para Motociclos", multa: 3000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "114", descricao: "Características Ilegais dos Veículos", multa: 12500, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "116", descricao: "Ausência de Inspeções", multa: 50000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "123", descricao: "Ausência de Carta de Condução", multa: 2500, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "150", descricao: "Obrigação de Seguro", multa: 25000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "0", descricao: "Exercício de Pesca sem Licença", multa: 100000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "0", descricao: "Ausência de Seguro na Embarcação", multa: 75000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "0", descricao: "Ausência do Livrete da Embarcação", multa: 60000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "0", descricao: "Ausência de Carta de Navegador", multa: 125000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "0", descricao: "Violação de Regras de Navegação", multa: 90000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "0", descricao: "Abalroamento Marítimo", multa: 120000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "1", descricao: "Homicídio", multa: 150000, minima: 8, maxima: 12, recomendada: 16 },
+    { artigo: "2", descricao: "Homicídio Qualificado", multa: 300000, minima: 12, maxima: 19, recomendada: 20 },
+    { artigo: "3", descricao: "Homicídio Privilegiado", multa: 30000, minima: 1, maxima: 3, recomendada: 5 },
+    { artigo: "4", descricao: "Ofensa à Integridade Física Simples", multa: 25000, minima: 0, maxima: 6, recomendada: 6 },
+    { artigo: "7", descricao: "Ofensa à Integridade Física por Negligência", multa: 75000, minima: 0, maxima: 2, recomendada: 2 },
+    { artigo: "6", descricao: "Ofensa à Integridade Física Qualificada", multa: 75000, minima: 0, maxima: 2, recomendada: 4 },
+    { artigo: "5", descricao: "Ofensa à Integridade Física Grave", multa: 50000, minima: 2, maxima: 8, recomendada: 10 },
+    { artigo: "9", descricao: "Violência Doméstica", multa: 50000, minima: 1, maxima: 3, recomendada: 5 },
+    { artigo: "10", descricao: "Maus Tratos", multa: 50000, minima: 1, maxima: 3, recomendada: 5 },
+    { artigo: "11", descricao: "Violação de Regras de Segurança", multa: 25000, minima: 1, maxima: 3, recomendada: 5 },
+    { artigo: "12", descricao: "Ameaça", multa: 30000, minima: 0, maxima: 0, recomendada: 1 },
+    { artigo: "13", descricao: "Coação", multa: 50000, minima: 0, maxima: 2, recomendada: 2 },
+    { artigo: "14", descricao: "Sequestro", multa: 75000, minima: 0, maxima: 2, recomendada: 3 },
+    { artigo: "15", descricao: "Escravidão", multa: 150000, minima: 5, maxima: 10, recomendada: 15 },
+    { artigo: "16", descricao: "Tráfico de Pessoas", multa: 150000, minima: 5, maxima: 10, recomendada: 15 },
+    { artigo: "17", descricao: "Rapto", multa: 100000, minima: 2, maxima: 5, recomendada: 8 },
+    { artigo: "18", descricao: "Tomada de Reféns", multa: 125000, minima: 2, maxima: 6, recomendada: 10 },
+    { artigo: "19", descricao: "Coação Sexual", multa: 100000, minima: 2, maxima: 5, recomendada: 8 },
+    { artigo: "20", descricao: "Violação", multa: 100000, minima: 3, maxima: 7, recomendada: 10 },
+    { artigo: "21", descricao: "Abuso Sexual de Pessoa Incapaz de Resistência", multa: 100000, minima: 2, maxima: 5, recomendada: 8 },
+    { artigo: "22", descricao: "Difamação", multa: 50000, minima: 0, maxima: 0, recomendada: 1 },
+    { artigo: "23", descricao: "Injúria", multa: 25000, minima: 0, maxima: 0, recomendada: 0 },
+    { artigo: "26", descricao: "Violação de Domicílio ou Perturbação da Vida Privada", multa: 30000, minima: 0, maxima: 2, recomendada: 2 },
+];
+
+            const crimeTable = document.getElementById("crimeTable");
+            crimes.forEach((crime, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${crime.descricao}</td>
+                    <td>${crime.multa.toFixed(2)}€</td>
+                    <td>${crime.minima} anos</td>
+                    <td>${crime.maxima} anos</td>
+                    <td>${crime.recomendada} anos</td>
+                    <td><input type="checkbox" data-index="${index}"></td>
+                `;
+                crimeTable.appendChild(row);
+            });
+
+            window.calculateSum = function() {
+                const checkboxes = document.querySelectorAll("input[type='checkbox']:checked");
+                let totalMulta = 0;
+                let totalMinima = 0;
+                let totalMaxima = 0;
+                let totalRecomendada = 0;
+
+                checkboxes.forEach(checkbox => {
+                    const index = checkbox.getAttribute("data-index");
+                    const crime = crimes[index];
+                    totalMulta += crime.multa;
+                    totalMinima += crime.minima;
+                    totalMaxima += crime.maxima;
+                    totalRecomendada += crime.recomendada;
+                });
+
+                const result = document.getElementById("result");
+                result.innerHTML = `
+                    <strong>Total de Multas:</strong> ${totalMulta.toFixed(2)}€<br>
+                    <strong>Pena Mínima Total:</strong> ${totalMinima} anos<br>
+                    <strong>Pena Máxima Total:</strong> ${totalMaxima} anos<br>
+                    <strong>Pena Recomendada Total:</strong> ${totalRecomendada} anos
+                `;
+            };
+        });
+    </script>
+</body>
+</html>
